@@ -64,12 +64,7 @@ abstract contract LSSVMPair is
     // Parameterized Errors
     error BondingCurveError(CurveErrorCodes.Error error);
 
-    /**
-      Called during pair creation to set initial parameters, only called once by factory to initialize.
-      We verify this by making sure that the current owner is address(0). 
-      The Ownable library we use disallows setting the owner to be address(0), so this condition
-      should only be valid before the first initialize call. 
-     */
+    // Used to initialize a pool
     function initialize(
         address _owner,
         address payable _assetRecipient,
@@ -102,5 +97,143 @@ abstract contract LSSVMPair is
         );
         delta = _delta;
         spotPrice = _spotPrice;
+    }
+
+    // EXTERNAL FUNCTIONS
+
+    // Function allows a user to swap a given amount of tokens for a specified number of Non-Fungible Tokens (NFTs)
+    function swapTokenForAnyNFTs(
+        uint256 numNFTs,
+        uint256 maxExpectedTokenInput,
+        address nftRecipient,
+        bool isRouter,
+        address routerCaller
+    ) external payable virtual nonReentrant returns (uint256 inputAmount) {
+        // Store locally to remove extra calls
+        ILSSVMPairFactoryLike _factory = factory();
+        ICurve _bondingCurve = bondingCurve();
+        IERC721 _nft = nft();
+
+        // Input validation
+        {
+            PoolType _poolType = poolType();
+            require(
+                _poolType == PoolType.NFT || _poolType == PoolType.TRADE,
+                "Wrong Pool type"
+            );
+            require(
+                (numNFTs > 0) && (numNFTs <= _nft.balanceOf(address(this))),
+                "Ask for > 0 and <= balanceOf NFTs"
+            );
+        }
+
+        // Call bonding curve for pricing information
+        uint256 protocolFee;
+        (protocolFee, inputAmount) = _calculateBuyInfoAndUpdatePoolParams(
+            numNFTs,
+            maxExpectedTokenInput,
+            _bondingCurve,
+            _factory
+        );
+
+        _pullTokenInputAndPayProtocolFee(
+            inputAmount,
+            isRouter,
+            routerCaller,
+            _factory,
+            protocolFee
+        );
+
+        _sendAnyNFTsToRecipient(_nft, nftRecipient, numNFTs);
+
+        _refundTokenToSender(inputAmount);
+
+        emit SwapNFTOutPair();
+    }
+
+    // Allows a user to swap a specific amount of tokens for a set of Non-Fungible Tokens (NFTs)
+    function swapTokenForSpecificNFTs(
+        uint256[] calldata nftIds,
+        uint256 maxExpectedTokenInput,
+        address nftRecipient,
+        bool isRouter,
+        address routerCaller
+    ) external payable virtual nonReentrant returns (uint256 inputAmount) {
+        // Store locally to remove extra calls
+        ILSSVMPairFactoryLike _factory = factory();
+        ICurve _bondingCurve = bondingCurve();
+
+        // Input validation
+        {
+            PoolType _poolType = poolType();
+            require(
+                _poolType == PoolType.NFT || _poolType == PoolType.TRADE,
+                "Wrong Pool type"
+            );
+            require((nftIds.length > 0), "Must ask for > 0 NFTs");
+        }
+
+        // Call bonding curve for pricing information
+        uint256 protocolFee;
+        (protocolFee, inputAmount) = _calculateBuyInfoAndUpdatePoolParams(
+            nftIds.length,
+            maxExpectedTokenInput,
+            _bondingCurve,
+            _factory
+        );
+
+        _pullTokenInputAndPayProtocolFee(
+            inputAmount,
+            isRouter,
+            routerCaller,
+            _factory,
+            protocolFee
+        );
+
+        _sendSpecificNFTsToRecipient(nft(), nftRecipient, nftIds);
+
+        _refundTokenToSender(inputAmount);
+
+        emit SwapNFTOutPair();
+    }
+
+    // Allows users to swap NFTs for tokens
+    function swapNFTsForToken(
+        uint256[] calldata nftIds,
+        uint256 minExpectedTokenOutput,
+        address payable tokenRecipient,
+        bool isRouter,
+        address routerCaller
+    ) external virtual nonReentrant returns (uint256 outputAmount) {
+        // Store locally to remove extra calls
+        ILSSVMPairFactoryLike _factory = factory();
+        ICurve _bondingCurve = bondingCurve();
+
+        // Input validation
+        {
+            PoolType _poolType = poolType();
+            require(
+                _poolType == PoolType.TOKEN || _poolType == PoolType.TRADE,
+                "Wrong Pool type"
+            );
+            require(nftIds.length > 0, "Must ask for > 0 NFTs");
+        }
+
+        // Call bonding curve for pricing information
+        uint256 protocolFee;
+        (protocolFee, outputAmount) = _calculateSellInfoAndUpdatePoolParams(
+            nftIds.length,
+            minExpectedTokenOutput,
+            _bondingCurve,
+            _factory
+        );
+
+        _sendTokenOutput(tokenRecipient, outputAmount);
+
+        _payProtocolFeeFromPair(_factory, protocolFee);
+
+        _takeNFTsFromSender(nft(), nftIds, _factory, isRouter, routerCaller);
+
+        emit SwapNFTInPair();
     }
 }
