@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+// Referenced from https://github.com/sudoswap/lssvm/blob/main/src/LSSVMPair.sol
+
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
@@ -597,4 +599,124 @@ abstract contract LSSVMPair is
 
     // Used internally to grab pair parameters from calldata
     function _immutableParamsLength() internal pure virtual returns (uint256);
+
+    // OWNER FUNCTIONS
+
+    // Rescues a specified set of NFTs owned by the pair to the owner address. (onlyOwnable modifier is in the implemented function)
+    function withdrawERC721(
+        IERC721 a,
+        uint256[] calldata nftIds
+    ) external virtual;
+
+    // Rescues ERC20 tokens from the pair to the owner. Only callable by the owner (onlyOwnable modifier is in the implemented function).
+    function withdrawERC20(ERC20 a, uint256 amount) external virtual;
+
+    // Rescues ERC1155 tokens from the pair to the owner. Only callable by the owner
+    function withdrawERC1155(
+        IERC1155 a,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external onlyOwner {
+        a.safeBatchTransferFrom(address(this), msg.sender, ids, amounts, "");
+    }
+
+    // Updates the selling spot price. Only callable by the owner
+    function changeSpotPrice(uint128 newSpotPrice) external onlyOwner {
+        ICurve _bondingCurve = bondingCurve();
+        require(
+            _bondingCurve.validateSpotPrice(newSpotPrice),
+            "Invalid new spot price for curve"
+        );
+        if (spotPrice != newSpotPrice) {
+            spotPrice = newSpotPrice;
+            emit SpotPriceUpdate(newSpotPrice);
+        }
+    }
+
+    // Updates the delta parameter. Only callable by the owner
+    function changeDelta(uint128 newDelta) external onlyOwner {
+        ICurve _bondingCurve = bondingCurve();
+        require(
+            _bondingCurve.validateDelta(newDelta),
+            "Invalid delta for curve"
+        );
+        if (delta != newDelta) {
+            delta = newDelta;
+            emit DeltaUpdate(newDelta);
+        }
+    }
+
+    // Updates the fee taken by the LP. Only callable by the owner. Only callable if the pool is a Trade pool. 
+    // Reverts if the fee is >= MAX_FEE.
+    function changeFee(uint96 newFee) external onlyOwner {
+        PoolType _poolType = poolType();
+        require(_poolType == PoolType.TRADE, "Only for Trade pools");
+        require(newFee < MAX_FEE, "Trade fee must be less than 90%");
+        if (fee != newFee) {
+            fee = newFee;
+            emit FeeUpdate(newFee);
+        }
+    }
+
+    // Changes the address that will receive assets received from trades. Only callable by the owner.
+    function changeAssetRecipient(
+        address payable newRecipient
+    ) external onlyOwner {
+        PoolType _poolType = poolType();
+        require(_poolType != PoolType.TRADE, "Not for Trade pools");
+        if (assetRecipient != newRecipient) {
+            assetRecipient = newRecipient;
+            emit AssetRecipientChange(newRecipient);
+        }
+    }
+
+    // Allows the pair to make arbitrary external calls to contracts whitelisted by the protocol. Only callable by the owner.
+    function call(
+        address payable target,
+        bytes calldata data
+    ) external onlyOwner {
+        ILSSVMPairFactoryLike _factory = factory();
+        require(_factory.callAllowed(target), "Target must be whitelisted");
+        (bool result, ) = target.call{value: 0}(data);
+        require(result, "Call failed");
+    }
+
+    // Allows owner to batch multiple calls 
+    function multicall(
+        bytes[] calldata calls,
+        bool revertOnFail
+    ) external onlyOwner {
+        for (uint256 i; i < calls.length; ) {
+            (bool success, bytes memory result) = address(this).delegatecall(
+                calls[i]
+            );
+            if (!success && revertOnFail) {
+                revert(_getRevertMsg(result));
+            }
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Prevent multicall from malicious frontend sneaking in ownership change
+        require(
+            owner() == msg.sender,
+            "Ownership cannot be changed in multicall"
+        );
+    }
+
+    // Used to retrieve the revert message from a transaction that has been reverted
+    function _getRevertMsg(
+        bytes memory _returnData
+    ) internal pure returns (string memory) {
+        // If the _res length is less than 68, then the transaction failed silently (without a revert message)
+        if (_returnData.length < 68) return "Transaction reverted silently";
+
+        assembly {
+            // Slice the sighash.
+            _returnData := add(_returnData, 0x04)
+        }
+        return abi.decode(_returnData, (string)); // All that remains is the revert string
+    }
 }
