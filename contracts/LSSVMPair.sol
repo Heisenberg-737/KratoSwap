@@ -300,4 +300,80 @@ abstract contract LSSVMPair is
             factory().protocolFeeMultiplier()
         );
     }
+
+    // Retrieves the ILSSVMPairFactoryLike instance from the contract's calldata
+    function getAllHeldIds() external view virtual returns (uint256[] memory);
+
+    // Returns the pair's variant (NFT is enumerable or not, pair uses ETH or ERC20)
+    function pairVariant()
+        public
+        pure
+        virtual
+        returns (ILSSVMPairFactoryLike.PairVariant);
+
+    // Returns an ILSSVMPairFactoryLike object, which is used to create a new instance of an ILSSVMPair contract. 
+    // It does this by retrieving the address of the factory from the end of the call data, and then shifting it to the right by 60 bits
+    function factory() public pure returns (ILSSVMPairFactoryLike _factory) {
+        uint256 paramsLength = _immutableParamsLength();
+        assembly {
+            _factory := shr(
+                0x60,
+                calldataload(sub(calldatasize(), paramsLength))
+            )
+        }
+    }
+
+    // Returns the type (address) of bonding curve that parameterizes the pair from the calldata
+    function bondingCurve() public pure returns (ICurve _bondingCurve) {
+        uint256 paramsLength = _immutableParamsLength();
+        assembly {
+            _bondingCurve := shr(
+                0x60,
+                calldataload(add(sub(calldatasize(), paramsLength), 20))
+            )
+        }
+    }
+
+    // Returns the NFT collection that parameterizes the pair
+    function nft() public pure returns (IERC721 _nft) {
+        uint256 paramsLength = _immutableParamsLength();
+        assembly {
+            _nft := shr(
+                0x60,
+                calldataload(add(sub(calldatasize(), paramsLength), 40))
+            )
+        }
+    }
+
+    // Returns the pair's type (TOKEN/NFT/TRADE)
+    function poolType() public pure returns (PoolType _poolType) {
+        uint256 paramsLength = _immutableParamsLength();
+        assembly {
+            _poolType := shr(
+                0xf8,
+                calldataload(add(sub(calldatasize(), paramsLength), 60))
+            )
+        }
+    }
+
+    // Returns the address of recipient that receives assets when a swap is done with this pair
+    function getAssetRecipient()
+        public
+        view
+        returns (address payable _assetRecipient)
+    {
+        // If it's a TRADE pool, we know the recipient is 0 (TRADE pools can't set asset recipients)
+        // so just return address(this)
+        if (poolType() == PoolType.TRADE) {
+            return payable(address(this));
+        }
+
+        // Otherwise, we return the recipient if it's been set
+        // or replace it with address(this) if it's 0
+        _assetRecipient = assetRecipient;
+        if (_assetRecipient == address(0)) {
+            // Tokens will be transferred to address(this)
+            _assetRecipient = payable(address(this));
+        }
+    }
 }
