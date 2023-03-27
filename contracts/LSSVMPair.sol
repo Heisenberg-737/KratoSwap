@@ -376,4 +376,225 @@ abstract contract LSSVMPair is
             _assetRecipient = payable(address(this));
         }
     }
+
+    // INTERNAL FUNCTIONS
+
+    // Calculates the amount needed to be sent into the pair for a buy and updates spot price or delta if necessary
+    function _calculateBuyInfoAndUpdatePoolParams(
+        uint256 numNFTs,
+        uint256 maxExpectedTokenInput,
+        ICurve _bondingCurve,
+        ILSSVMPairFactoryLike _factory
+    ) internal returns (uint256 protocolFee, uint256 inputAmount) {
+        CurveErrorCodes.Error error;
+        // Save on 2 SLOADs by caching
+        uint128 currentSpotPrice = spotPrice;
+        uint128 newSpotPrice;
+        uint128 currentDelta = delta;
+        uint128 newDelta;
+        (
+            error,
+            newSpotPrice,
+            newDelta,
+            inputAmount,
+            protocolFee
+        ) = _bondingCurve.getBuyInfo(
+            currentSpotPrice,
+            currentDelta,
+            numNFTs,
+            fee,
+            _factory.protocolFeeMultiplier()
+        );
+
+        // Revert if bonding curve had an error
+        if (error != CurveErrorCodes.Error.OK) {
+            revert BondingCurveError(error);
+        }
+
+        // Revert if input is more than expected
+        require(inputAmount <= maxExpectedTokenInput, "In too many tokens");
+
+        // Consolidate writes to save gas
+        if (currentSpotPrice != newSpotPrice || currentDelta != newDelta) {
+            spotPrice = newSpotPrice;
+            delta = newDelta;
+        }
+
+        // Emit spot price update if it has been updated
+        if (currentSpotPrice != newSpotPrice) {
+            emit SpotPriceUpdate(newSpotPrice);
+        }
+
+        // Emit delta update if it has been updated
+        if (currentDelta != newDelta) {
+            emit DeltaUpdate(newDelta);
+        }
+    }
+
+    // Calculates the amount needed to be sent by the pair for a sell and adjusts spot price or delta if necessary
+    function _calculateSellInfoAndUpdatePoolParams(
+        uint256 numNFTs,
+        uint256 minExpectedTokenOutput,
+        ICurve _bondingCurve,
+        ILSSVMPairFactoryLike _factory
+    ) internal returns (uint256 protocolFee, uint256 outputAmount) {
+        CurveErrorCodes.Error error;
+
+        uint128 currentSpotPrice = spotPrice;
+        uint128 newSpotPrice;
+        uint128 currentDelta = delta;
+        uint128 newDelta;
+        (
+            error,
+            newSpotPrice,
+            newDelta,
+            outputAmount,
+            protocolFee
+        ) = _bondingCurve.getSellInfo(
+            currentSpotPrice,
+            currentDelta,
+            numNFTs,
+            fee,
+            _factory.protocolFeeMultiplier()
+        );
+
+        // Revert if bonding curve had an error
+        if (error != CurveErrorCodes.Error.OK) {
+            revert BondingCurveError(error);
+        }
+
+        // Revert if output is too little
+        require(
+            outputAmount >= minExpectedTokenOutput,
+            "Out too little tokens"
+        );
+
+        // Consolidate writes to save gas
+        if (currentSpotPrice != newSpotPrice || currentDelta != newDelta) {
+            spotPrice = newSpotPrice;
+            delta = newDelta;
+        }
+
+        // Emit spot price update if it has been updated
+        if (currentSpotPrice != newSpotPrice) {
+            emit SpotPriceUpdate(newSpotPrice);
+        }
+
+        // Emit delta update if it has been updated
+        if (currentDelta != newDelta) {
+            emit DeltaUpdate(newDelta);
+        }
+    }
+
+    // Pulls the token input of a trade from the trader and pays the protocol fee
+    function _pullTokenInputAndPayProtocolFee(
+        uint256 inputAmount,
+        bool isRouter,
+        address routerCaller,
+        ILSSVMPairFactoryLike _factory,
+        uint256 protocolFee
+    ) internal virtual;
+
+    // Used to take NFTs from the sender and transfer them to the asset recipient
+    function _refundTokenToSender(uint256 inputAmount) internal virtual;
+
+    // Sends protocol fee (if it exists) back to the LSSVMPairFactory from the pair
+    function _payProtocolFeeFromPair(
+        ILSSVMPairFactoryLike _factory,
+        uint256 protocolFee
+    ) internal virtual;
+
+    // Sends tokens to a recipient
+    function _sendTokenOutput(
+        address payable tokenRecipient,
+        uint256 outputAmount
+    ) internal virtual;
+
+    // Sends some number of NFTs from sender to a recipient address, ID agnostic
+    function _sendAnyNFTsToRecipient(
+        IERC721 _nft,
+        address nftRecipient,
+        uint256 numNFTs
+    ) internal virtual;
+
+    // Sends specific NFTs to a recipient address
+    function _sendSpecificNFTsToRecipient(
+        IERC721 _nft,
+        address nftRecipient,
+        uint256[] calldata nftIds
+    ) internal virtual;
+
+    // Takes NFTs from the caller and sends them into the pair's asset recipient
+    function _takeNFTsFromSender(
+        IERC721 _nft,
+        uint256[] calldata nftIds,
+        ILSSVMPairFactoryLike _factory,
+        bool isRouter,
+        address routerCaller
+    ) internal virtual {
+        {
+            address _assetRecipient = getAssetRecipient();
+            uint256 numNFTs = nftIds.length;
+
+            if (isRouter) {
+                // Verify if router is allowed
+                LSSVMRouter router = LSSVMRouter(payable(msg.sender));
+                (bool routerAllowed, ) = _factory.routerStatus(router);
+                require(routerAllowed, "Not router");
+
+                // Call router to pull NFTs
+                // If more than 1 NFT is being transfered, we can do a balance check instead of an ownership check, as pools are 
+                // indifferent between NFTs from the same collection
+                if (numNFTs > 1) {
+                    uint256 beforeBalance = _nft.balanceOf(_assetRecipient);
+                    for (uint256 i = 0; i < numNFTs; ) {
+                        router.pairTransferNFTFrom(
+                            _nft,
+                            routerCaller,
+                            _assetRecipient,
+                            nftIds[i],
+                            pairVariant()
+                        );
+
+                        unchecked {
+                            ++i;
+                        }
+                    }
+                    require(
+                        (_nft.balanceOf(_assetRecipient) - beforeBalance) ==
+                            numNFTs,
+                        "NFTs not transferred"
+                    );
+                } else {
+                    router.pairTransferNFTFrom(
+                        _nft,
+                        routerCaller,
+                        _assetRecipient,
+                        nftIds[0],
+                        pairVariant()
+                    );
+                    require(
+                        _nft.ownerOf(nftIds[0]) == _assetRecipient,
+                        "NFT not transferred"
+                    );
+                }
+            } else {
+                // Pull NFTs directly from sender
+                for (uint256 i; i < numNFTs; ) {
+                    _nft.safeTransferFrom(
+                        msg.sender,
+                        _assetRecipient,
+                        nftIds[i]
+                    );
+
+                    unchecked {
+                        ++i;
+                    }
+                }
+            }
+        }
+    }
+
+    // Used internally to grab pair parameters from calldata
+    function _immutableParamsLength() internal pure virtual returns (uint256);
 }
