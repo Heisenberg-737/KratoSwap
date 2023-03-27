@@ -236,4 +236,68 @@ abstract contract LSSVMPair is
 
         emit SwapNFTInPair();
     }
+
+    // VIEW FUNCTIONS
+
+    // Allows a user to get a quote for selling a given number of NFTs on the bonding curve
+    function getBuyNFTQuote(
+        uint256 numNFTs
+    )
+        external
+        view
+        returns (
+            CurveErrorCodes.Error error,
+            uint256 newSpotPrice,
+            uint256 newDelta,
+            uint256 inputAmount,
+            uint256 protocolFee
+        )
+    {
+        // Calling the getBuyInfo function from the bonding curve contract, which calculates the new spot 
+        // price, delta, input amount, and protocol fee based on the number of NFTs requested and the current spot price and delta
+        (
+            error,
+            newSpotPrice,
+            newDelta,
+            inputAmount,
+            protocolFee
+        ) = bondingCurve().getBuyInfo(
+            spotPrice,
+            delta,
+            numNFTs,
+            fee,
+            factory().protocolFeeMultiplier()
+        );
+    }
+
+    // Allows a user to get a quote for selling a given number of NFTs on the bonding curve
+    function getSellNFTQuote(
+        uint256 numNFTs
+    )
+        external
+        view
+        returns (
+            CurveErrorCodes.Error error,
+            uint256 newSpotPrice,
+            uint256 newDelta,
+            uint256 outputAmount,
+            uint256 protocolFee
+        )
+    {
+        // Calling the getSellInfo function from the bonding curve contract, 
+        // which calculates the new spot price, delta, output amount, and protocol fee based on the number of NFTs to be sold
+        (
+            error,
+            newSpotPrice,
+            newDelta,
+            outputAmount,
+            protocolFee
+        ) = bondingCurve().getSellInfo(
+            spotPrice,
+            delta,
+            numNFTs,
+            fee,
+            factory().protocolFeeMultiplier()
+        );
+    }
 }
