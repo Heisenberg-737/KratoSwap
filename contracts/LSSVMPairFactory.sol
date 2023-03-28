@@ -84,21 +84,7 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
      * External functions
      */
 
-    /**
-        @notice Creates a pair contract using EIP-1167.
-        @param _nft The NFT contract of the collection the pair trades
-        @param _bondingCurve The bonding curve for the pair to price NFTs, must be whitelisted
-        @param _assetRecipient The address that will receive the assets traders give during trades.
-                              If set to address(0), assets will be sent to the pool address.
-                              Not available to TRADE pools. 
-        @param _poolType TOKEN, NFT, or TRADE
-        @param _delta The delta value used by the bonding curve. The meaning of delta depends
-        on the specific curve.
-        @param _fee The fee taken by the LP in each trade. Can only be non-zero if _poolType is Trade.
-        @param _spotPrice The initial selling spot price
-        @param _initialNFTIDs The list of IDs of NFTs to transfer from the sender to the pair
-        @return pair The new pair
-     */
+    //creates an eth pair
     function createPairETH(
         IERC721 _nft,
         ICurve _bondingCurve,
@@ -113,14 +99,19 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
             bondingCurveAllowed[_bondingCurve],
             "Bonding curve not whitelisted"
         );
-        
+
         // Check to see if the NFT supports Enumerable to determine which template to use
         address template;
-        try IERC165(address(_nft)).supportsInterface(INTERFACE_ID_ERC721_ENUMERABLE) returns (bool isEnumerable) {
-          template = isEnumerable ? address(enumerableETHTemplate)
-            : address(missingEnumerableETHTemplate);
+        try
+            IERC165(address(_nft)).supportsInterface(
+                INTERFACE_ID_ERC721_ENUMERABLE
+            )
+        returns (bool isEnumerable) {
+            template = isEnumerable
+                ? address(enumerableETHTemplate)
+                : address(missingEnumerableETHTemplate);
         } catch {
-          template = address(missingEnumerableETHTemplate);
+            template = address(missingEnumerableETHTemplate);
         }
 
         pair = LSSVMPairETH(
@@ -146,22 +137,7 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         emit NewPair(address(pair));
     }
 
-    /**
-        @notice Creates a pair contract using EIP-1167.
-        @param _nft The NFT contract of the collection the pair trades
-        @param _bondingCurve The bonding curve for the pair to price NFTs, must be whitelisted
-        @param _assetRecipient The address that will receive the assets traders give during trades.
-                                If set to address(0), assets will be sent to the pool address.
-                                Not available to TRADE pools.
-        @param _poolType TOKEN, NFT, or TRADE
-        @param _delta The delta value used by the bonding curve. The meaning of delta depends
-        on the specific curve.
-        @param _fee The fee taken by the LP in each trade. Can only be non-zero if _poolType is Trade.
-        @param _spotPrice The initial selling spot price, in ETH
-        @param _initialNFTIDs The list of IDs of NFTs to transfer from the sender to the pair
-        @param _initialTokenBalance The initial token balance sent from the sender to the new pair
-        @return pair The new pair
-     */
+    //creates and erc20 pair
     struct CreateERC20PairParams {
         ERC20 token;
         IERC721 nft;
@@ -175,10 +151,9 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         uint256 initialTokenBalance;
     }
 
-    function createPairERC20(CreateERC20PairParams calldata params)
-        external
-        returns (LSSVMPairERC20 pair)
-    {
+    function createPairERC20(
+        CreateERC20PairParams calldata params
+    ) external returns (LSSVMPairERC20 pair) {
         require(
             bondingCurveAllowed[params.bondingCurve],
             "Bonding curve not whitelisted"
@@ -186,11 +161,16 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
 
         // Check to see if the NFT supports Enumerable to determine which template to use
         address template;
-        try IERC165(address(params.nft)).supportsInterface(INTERFACE_ID_ERC721_ENUMERABLE) returns (bool isEnumerable) {
-          template = isEnumerable ? address(enumerableERC20Template)
-            : address(missingEnumerableERC20Template);
+        try
+            IERC165(address(params.nft)).supportsInterface(
+                INTERFACE_ID_ERC721_ENUMERABLE
+            )
+        returns (bool isEnumerable) {
+            template = isEnumerable
+                ? address(enumerableERC20Template)
+                : address(missingEnumerableERC20Template);
         } catch {
-          template = address(missingEnumerableERC20Template);
+            template = address(missingEnumerableERC20Template);
         }
 
         pair = LSSVMPairERC20(
@@ -219,18 +199,11 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         emit NewPair(address(pair));
     }
 
-    /**
-        @notice Checks if an address is a LSSVMPair. Uses the fact that the pairs are EIP-1167 minimal proxies.
-        @param potentialPair The address to check
-        @param variant The pair variant (NFT is enumerable or not, pair uses ETH or ERC20)
-        @return True if the address is the specified pair variant, false otherwise
-     */
-    function isPair(address potentialPair, PairVariant variant)
-        public
-        view
-        override
-        returns (bool)
-    {
+    //checks if an address is an lssvmPair
+    function isPair(
+        address potentialPair,
+        PairVariant variant
+    ) public view override returns (bool) {
         if (variant == PairVariant.ENUMERABLE_ERC20) {
             return
                 LSSVMPairCloner.isERC20PairClone(
@@ -272,77 +245,54 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
 
     /**
      * Admin functions
+     * only callable by the owner
      */
 
-    /**
-        @notice Withdraws the ETH balance to the protocol fee recipient.
-        Only callable by the owner.
-     */
+    //withdraw the eth balance to the protocol fee recipient.
     function withdrawETHProtocolFees() external onlyOwner {
         protocolFeeRecipient.safeTransferETH(address(this).balance);
     }
 
-    /**
-        @notice Withdraws ERC20 tokens to the protocol fee recipient. Only callable by the owner.
-        @param token The token to transfer
-        @param amount The amount of tokens to transfer
-     */
-    function withdrawERC20ProtocolFees(ERC20 token, uint256 amount)
-        external
-        onlyOwner
-    {
+    //withdraws erc20 tokens to the protocol fee recipient.
+    function withdrawERC20ProtocolFees(
+        ERC20 token,
+        uint256 amount
+    ) external onlyOwner {
         token.safeTransfer(protocolFeeRecipient, amount);
     }
 
-    /**
-        @notice Changes the protocol fee recipient address. Only callable by the owner.
-        @param _protocolFeeRecipient The new fee recipient
-     */
-    function changeProtocolFeeRecipient(address payable _protocolFeeRecipient)
-        external
-        onlyOwner
-    {
+    //changes the protocol fee recipient address/
+    function changeProtocolFeeRecipient(
+        address payable _protocolFeeRecipient
+    ) external onlyOwner {
         require(_protocolFeeRecipient != address(0), "0 address");
         protocolFeeRecipient = _protocolFeeRecipient;
         emit ProtocolFeeRecipientUpdate(_protocolFeeRecipient);
     }
 
-    /**
-        @notice Changes the protocol fee multiplier. Only callable by the owner.
-        @param _protocolFeeMultiplier The new fee multiplier, 18 decimals
-     */
-    function changeProtocolFeeMultiplier(uint256 _protocolFeeMultiplier)
-        external
-        onlyOwner
-    {
+    //changes the protocol fee multiplier
+    function changeProtocolFeeMultiplier(
+        uint256 _protocolFeeMultiplier
+    ) external onlyOwner {
         require(_protocolFeeMultiplier <= MAX_PROTOCOL_FEE, "Fee too large");
         protocolFeeMultiplier = _protocolFeeMultiplier;
         emit ProtocolFeeMultiplierUpdate(_protocolFeeMultiplier);
     }
 
-    /**
-        @notice Sets the whitelist status of a bonding curve contract. Only callable by the owner.
-        @param bondingCurve The bonding curve contract
-        @param isAllowed True to whitelist, false to remove from whitelist
-     */
-    function setBondingCurveAllowed(ICurve bondingCurve, bool isAllowed)
-        external
-        onlyOwner
-    {
+    //sets the whitelist status of a bonding curve contract
+    function setBondingCurveAllowed(
+        ICurve bondingCurve,
+        bool isAllowed
+    ) external onlyOwner {
         bondingCurveAllowed[bondingCurve] = isAllowed;
         emit BondingCurveStatusUpdate(bondingCurve, isAllowed);
     }
 
-    /**
-        @notice Sets the whitelist status of a contract to be called arbitrarily by a pair.
-        Only callable by the owner.
-        @param target The target contract
-        @param isAllowed True to whitelist, false to remove from whitelist
-     */
-    function setCallAllowed(address payable target, bool isAllowed)
-        external
-        onlyOwner
-    {
+    //set the whitelist status of a contract to be called aribtrarily by a pair
+    function setCallAllowed(
+        address payable target,
+        bool isAllowed
+    ) external onlyOwner {
         // ensure target is not / was not ever a router
         if (isAllowed) {
             require(
@@ -355,15 +305,11 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         emit CallTargetStatusUpdate(target, isAllowed);
     }
 
-    /**
-        @notice Updates the router whitelist. Only callable by the owner.
-        @param _router The router
-        @param isAllowed True to whitelist, false to remove from whitelist
-     */
-    function setRouterAllowed(LSSVMRouter _router, bool isAllowed)
-        external
-        onlyOwner
-    {
+    //updates teh router whitelist
+    function setRouterAllowed(
+        LSSVMRouter _router,
+        bool isAllowed
+    ) external onlyOwner {
         // ensure target is not arbitrarily callable by pairs
         if (isAllowed) {
             require(!callAllowed[address(_router)], "Can't call router");
@@ -446,9 +392,7 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         }
     }
 
-    /** 
-      @dev Used to deposit NFTs into a pair after creation and emit an event for indexing (if recipient is indeed a pair)
-    */
+    //used to depositi nfts into a pair after creation and emit an event for indexing
     function depositNFTs(
         IERC721 _nft,
         uint256[] calldata ids,
@@ -473,9 +417,7 @@ contract LSSVMPairFactory is Ownable, ILSSVMPairFactoryLike {
         }
     }
 
-    /**
-      @dev Used to deposit ERC20s into a pair after creation and emit an event for indexing (if recipient is indeed an ERC20 pair and the token matches)
-     */
+    //user to depositi erc20s into a pair after creation and emit an event for indexing
     function depositERC20(
         ERC20 token,
         address recipient,
