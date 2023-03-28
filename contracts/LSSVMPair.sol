@@ -255,7 +255,7 @@ abstract contract LSSVMPair is
             uint256 protocolFee
         )
     {
-        // Calling the getBuyInfo function from the bonding curve contract, which calculates the new spot 
+        // Calling the getBuyInfo function from the bonding curve contract, which calculates the new spot
         // price, delta, input amount, and protocol fee based on the number of NFTs requested and the current spot price and delta
         (
             error,
@@ -286,7 +286,7 @@ abstract contract LSSVMPair is
             uint256 protocolFee
         )
     {
-        // Calling the getSellInfo function from the bonding curve contract, 
+        // Calling the getSellInfo function from the bonding curve contract,
         // which calculates the new spot price, delta, output amount, and protocol fee based on the number of NFTs to be sold
         (
             error,
@@ -313,7 +313,7 @@ abstract contract LSSVMPair is
         virtual
         returns (ILSSVMPairFactoryLike.PairVariant);
 
-    // Returns an ILSSVMPairFactoryLike object, which is used to create a new instance of an ILSSVMPair contract. 
+    // Returns an ILSSVMPairFactoryLike object, which is used to create a new instance of an ILSSVMPair contract.
     // It does this by retrieving the address of the factory from the end of the call data, and then shifting it to the right by 60 bits
     function factory() public pure returns (ILSSVMPairFactoryLike _factory) {
         uint256 paramsLength = _immutableParamsLength();
@@ -720,3 +720,4 @@ abstract contract LSSVMPair is
         return abi.decode(_returnData, (string)); // All that remains is the revert string
     }
 }
+
