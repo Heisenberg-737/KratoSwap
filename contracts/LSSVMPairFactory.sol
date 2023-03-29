@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -15,7 +15,7 @@ import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.s
 import {LSSVMPair} from "./LSSVMPair.sol";
 import {LSSVMRouter} from "./LSSVMRouter.sol";
 import {LSSVMPairETH} from "./LSSVMPairETH.sol";
-import {ICurve} from "./bonding-curves/ICurve.sol";
+import {ICurve} from "./bondingCurves/ICurve.sol";
 import {LSSVMPairERC20} from "./LSSVMPairERC20.sol";
 
 import {LSSVMPairCloner} from "./lib/LSSVMPairCloner.sol";

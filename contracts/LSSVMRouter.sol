@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.9;
 
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {LSSVMPair} from "./LSSVMPair.sol";
 import {ILSSVMPairFactoryLike} from "./ILSSVMPairFactoryLike.sol";
-import {CurveErrorCodes} from "./bonding-curves/CurveErrorCodes.sol";
+import {CurveErrorCodes} from "./bondingCurves/curveErrorCodes.sol";
 
 // Does the swapping of NFTs using the LSSVMPair contract
 contract LSSVMRouter {

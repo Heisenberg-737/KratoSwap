@@ -9,8 +9,8 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {LSSVMPair} from "./LSSVMPair.sol";
 import {ILSSVMPairFactoryLike} from "./ILSSVMPairFactoryLike.sol";
 import {LSSVMRouter} from "./LSSVMRouter.sol";
-import {ICurve} from "./bonding-curves/ICurve.sol";
-import {CurveErrorCodes} from "./bonding-curves/CurveErrorCodes.sol";
+import {ICurve} from "./bondingCurves/ICurve.sol";
+import {CurveErrorCodes} from "./bondingCurves/curveErrorCodes.sol";
 
 // An NFT/Token pair where the token is an ERC20
 abstract contract LSSVMPairERC20 is LSSVMPair {

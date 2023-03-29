@@ -11,10 +11,10 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import {OwnableWithTransferCallback} from "./lib/OwnableWithTransferCallback.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import {ICurve} from "./bonding-curves/ICurve.sol";
+import {ICurve} from "./bondingCurves/ICurve.sol";
 import {LSSVMRouter} from "./LSSVMRouter.sol";
 import {ILSSVMPairFactoryLike} from "./ILSSVMPairFactoryLike.sol";
-import {CurveErrorCodes} from "./bonding-curves/CurveErrorCodes.sol";
+import {CurveErrorCodes} from "./bondingCurves/curveErrorCodes.sol";
 import {ERC1155Holder} from "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 /// The base contract for an NFT/TOKEN AMM pair
