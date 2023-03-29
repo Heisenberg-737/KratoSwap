@@ -1,7 +1,7 @@
 # KratoSwap
 ## A NFT Trading Platform using AMMs
 
-NFT Trading Platform using Automated Market Makers is a DEX protocol that enables trading of NFTs on Ethereum Blockchain
+KratoSwap is a NFT Trading Platform using Automated Market Makers is a DEX protocol that enables trading of NFTs on Ethereum Blockchain
 
 ## Objectives
 - As an NFT AMM protocol, the project works by letting Liquidity Providers deposit NFTs and/or ETH into liquidity pools.
