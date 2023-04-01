@@ -19,6 +19,7 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2",
     "@rari-capital/solmate": "^6.4.0",
+    "dotenv": "^16.0.3",
     "solmate": "^6.7.0"
   }
 }

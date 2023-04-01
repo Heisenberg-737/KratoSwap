@@ -4,8 +4,8 @@ pragma solidity ^0.8.9;
 // Referenced from https://github.com/sudoswap/lssvm/blob/main/src/bonding-curves/LinearCurve.sol
 
 import {ICurve} from "./ICurve.sol";
-import {CurveErrorCodes} from "./CurveErrorCodes.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {CurveErrorCodes} from "./curveErrorCodes.sol";
+import {FixedPointMathLib} from "@rari-capital/solmate/src/utils/FixedPointMathLib.sol";
 
 // Bonding curve logic for a linear curve, where each buy/sell changes spot price by adding/substracting delta
 contract LinearCurve is ICurve, CurveErrorCodes {

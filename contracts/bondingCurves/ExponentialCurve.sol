@@ -4,8 +4,8 @@ pragma solidity ^0.8.9;
 // Referenced from https://github.com/sudoswap/lssvm/blob/main/src/bonding-curves/ExponentialCurve.sol
 
 import {ICurve} from "./ICurve.sol";
-import {CurveErrorCodes} from "./CurveErrorCodes.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {CurveErrorCodes} from "./curveErrorCodes.sol";
+import {FixedPointMathLib} from "@rari-capital/solmate/src/utils/FixedPointMathLib.sol";
 
 // Bonding curve logic for an exponential curve, where each buy/sell changes spot price by multiplying/dividing delta
 contract ExponentialCurve is ICurve, CurveErrorCodes {

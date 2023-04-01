@@ -137,11 +137,10 @@ abstract contract LSSVMPairERC20 is LSSVMPair {
     }
 
     // Allows the owner of the contract to withdraw a specified amount of ERC20 tokens from the contract
-    function withdrawERC20(ERC20 a, uint256 amount)
-        external
-        override
-        onlyOwner
-    {
+    function withdrawERC20(
+        ERC20 a,
+        uint256 amount
+    ) external onlyOwner {
         a.safeTransfer(msg.sender, amount);
 
         if (a == token()) {
