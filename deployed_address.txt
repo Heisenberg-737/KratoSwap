@@ -1,0 +1,31 @@
+Deploy
+lSSVMPairEnumerableETH deployed at Address:  0xdE1a4F6A44A8d7B858509e81F5B4dC62565d067a
+    ✔ Will deploy LSSVMPairEnumerableETH contract (10096ms)
+LSSVMPairMissingEnumerableETH deployed at Address:  0x9171b2a165ab8b1BE7CcbD912380148153f764a6
+    ✔ Will deploy LSSVMPairMissingEnumerableETH contract (8063ms)
+LSSVMPairEnumerableERC20 deployed at Address:  0x3218d604A9d70665886569356AFA2Dd9561D8a5C
+    ✔ Will deploy LSSVMPairEnumerableERC20 contract (3979ms)
+LSSVMPairMissingEnumerableERC20 deployed at Address:  0xc727D3aa672C901FCb10E8036Af421b642B95BCC
+    ✔ Will deploy LSSVMPairMissingEnumerableERC20 contract (7955ms)
+LSSVMPairFactory deployed at Address:  0x23fd083D59DA9F3738F17A83fCa3D41DbC88c3F8
+constructor args: "0xdE1a4F6A44A8d7B858509e81F5B4dC62565d067a" "0x9171b2a165ab8b1BE7CcbD912380148153f764a6"
+    "0x3218d604A9d70665886569356AFA2Dd9561D8a5C" "0xc727D3aa672C901FCb10E8036Af421b642B95BCC" "0x1021BB533a5c04B7F9E0cE55c9C3Cd539A7aFc95" "0"
+    ✔ Will deploy LSSVMPairFactory contract (4045ms)
+LSSVMRouter deployed at Address:  0x7517F2805D2f23c8e4F4C1f15365C7194CEBa578
+    ✔ Will deploy LSSVMRouter contract (8185ms)
+LSSVMRouter has been whitelisted in Factory:  0x72cc692f7cfc734838445dd56f5602f17bea9db243d3555ecc617a39c5eac630
+    ✔ Will Whitelist router in factory (7863ms)
+ExponentialCurve deployed at Address:  0x03CFc311e449BBe0BDa558b608A9F7B3263aD9aF
+    ✔ Will deploy ExponentialCurve contract (7775ms)
+LinearCurve deployed at Address:  0x60C634eD38226421e628EEb95bf143461AA76549
+    ✔ Will deploy LinearCurve contract (7900ms)
+ExponentialCurve whitelisted at:  0x61bedab8be3c109a5476727dca6710ef67dadf16fa3299d7b4e287ba3c9f4d6b
+LinearCurve whitelisted at:  0x77d4aabb0801b27c6c903d5cd0bd12046386b7dbfa76e4887d4f131e3bec80f2
+    ✔ Whitelist bonding curves in factory (15574ms)
+Transferred factory ownership.
+New Owner:  0x1021BB533a5c04B7F9E0cE55c9C3Cd539A7aFc95 
+Hash:  0x93425cc5567fddcdda1fc7f86ce8d04296605a6f51702bf158c3776a3bd6dea1
+    ✔ Transfer factory ownership to admin (7767ms)
+
+
+  11 passing (1m)
