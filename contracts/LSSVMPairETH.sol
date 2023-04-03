@@ -113,7 +113,6 @@ abstract contract LSSVMPairETH is LSSVMPair {
         emit TokenWithdrawal(amount);
     }
 
-    /// @inheritdoc LSSVMPair
     function withdrawERC20(ERC20 a, uint256 amount)
         external
         override

@@ -8,6 +8,7 @@ import {ILSSVMPairFactoryLike} from "./ILSSVMPairFactoryLike.sol";
 // An NFT/Token pair where the NFT implements ERC721Enumerable, and the token is an ERC20
 contract LSSVMPairEnumerableERC20 is LSSVMPairEnumerable, LSSVMPairERC20 {
     // Returns the LSSVMPair type
+    
     function pairVariant()
         public
         pure

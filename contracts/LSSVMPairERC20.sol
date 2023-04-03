@@ -3,8 +3,8 @@ pragma solidity ^0.8.9;
 
 // Referenced from https://github.com/sudoswap/lssvm/blob/main/src/LSSVMPairERC20.sol
 
-import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
-import {ERC20} from "solmate/src/tokens/ERC20.sol";
+import {SafeTransferLib} from "@rari-capital/solmate/src/utils/SafeTransferLib.sol";
+import {ERC20} from "@rari-capital/solmate/src/tokens/ERC20.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {LSSVMPair} from "./LSSVMPair.sol";
 import {ILSSVMPairFactoryLike} from "./ILSSVMPairFactoryLike.sol";
@@ -140,7 +140,7 @@ abstract contract LSSVMPairERC20 is LSSVMPair {
     function withdrawERC20(
         ERC20 a,
         uint256 amount
-    ) external onlyOwner {
+    ) external override onlyOwner {
         a.safeTransfer(msg.sender, amount);
 
         if (a == token()) {
