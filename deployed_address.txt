@@ -1,31 +1,34 @@
-Deploy
-lSSVMPairEnumerableETH deployed at Address:  0xdE1a4F6A44A8d7B858509e81F5B4dC62565d067a
-    ✔ Will deploy LSSVMPairEnumerableETH contract (10096ms)
-LSSVMPairMissingEnumerableETH deployed at Address:  0x9171b2a165ab8b1BE7CcbD912380148153f764a6
-    ✔ Will deploy LSSVMPairMissingEnumerableETH contract (8063ms)
-LSSVMPairEnumerableERC20 deployed at Address:  0x3218d604A9d70665886569356AFA2Dd9561D8a5C
-    ✔ Will deploy LSSVMPairEnumerableERC20 contract (3979ms)
-LSSVMPairMissingEnumerableERC20 deployed at Address:  0xc727D3aa672C901FCb10E8036Af421b642B95BCC
-    ✔ Will deploy LSSVMPairMissingEnumerableERC20 contract (7955ms)
-LSSVMPairFactory deployed at Address:  0x23fd083D59DA9F3738F17A83fCa3D41DbC88c3F8
-constructor args: "0xdE1a4F6A44A8d7B858509e81F5B4dC62565d067a" "0x9171b2a165ab8b1BE7CcbD912380148153f764a6"
-    "0x3218d604A9d70665886569356AFA2Dd9561D8a5C" "0xc727D3aa672C901FCb10E8036Af421b642B95BCC" "0x1021BB533a5c04B7F9E0cE55c9C3Cd539A7aFc95" "0"
-    ✔ Will deploy LSSVMPairFactory contract (4045ms)
-LSSVMRouter deployed at Address:  0x7517F2805D2f23c8e4F4C1f15365C7194CEBa578
-    ✔ Will deploy LSSVMRouter contract (8185ms)
-LSSVMRouter has been whitelisted in Factory:  0x72cc692f7cfc734838445dd56f5602f17bea9db243d3555ecc617a39c5eac630
-    ✔ Will Whitelist router in factory (7863ms)
-ExponentialCurve deployed at Address:  0x03CFc311e449BBe0BDa558b608A9F7B3263aD9aF
-    ✔ Will deploy ExponentialCurve contract (7775ms)
-LinearCurve deployed at Address:  0x60C634eD38226421e628EEb95bf143461AA76549
-    ✔ Will deploy LinearCurve contract (7900ms)
-ExponentialCurve whitelisted at:  0x61bedab8be3c109a5476727dca6710ef67dadf16fa3299d7b4e287ba3c9f4d6b
-LinearCurve whitelisted at:  0x77d4aabb0801b27c6c903d5cd0bd12046386b7dbfa76e4887d4f131e3bec80f2
-    ✔ Whitelist bonding curves in factory (15574ms)
+  Deploy
+lSSVMPairEnumerableETH deployed at Address:  0xd462AA53dF29Ab1F6B0ADaf26d11F24F8E592E28
+    ✔ Will deploy LSSVMPairEnumerableETH contract (12517ms)
+LSSVMPairMissingEnumerableETH deployed at Address:  0x2CCAd871ECAfC10b829d4AF15958a61Cf0569f20
+    ✔ Will deploy LSSVMPairMissingEnumerableETH contract (7502ms)
+LSSVMPairEnumerableERC20 deployed at Address:  0xb00B456Bf8a61F63ca27c67E24105aDa0c17EE9f
+    ✔ Will deploy LSSVMPairEnumerableERC20 contract (8265ms)
+LSSVMPairMissingEnumerableERC20 deployed at Address:  0xA12b01CbC90290614D31bb8bF1D98D8FE5123D78
+    ✔ Will deploy LSSVMPairMissingEnumerableERC20 contract (9895ms)
+LSSVMPairFactory deployed at Address:  0x9435EA9378F9FaDB62767b10c52ed9eC76Ff6c1B
+constructor args: "0xd462AA53dF29Ab1F6B0ADaf26d11F24F8E592E28" "0x2CCAd871ECAfC10b829d4AF15958a61Cf0569f20"
+    "0xb00B456Bf8a61F63ca27c67E24105aDa0c17EE9f" "0xA12b01CbC90290614D31bb8bF1D98D8FE5123D78" "0x1021BB533a5c04B7F9E0cE55c9C3Cd539A7aFc95" "0"
+    ✔ Will deploy LSSVMPairFactory contract (5752ms)
+LSSVMRouter deployed at Address:  0xC1dDe01334AfdFf3FEa4DB3efe10D009BF6d1B3D
+    ✔ Will deploy LSSVMRouter contract (7858ms)
+LSSVMRouter has been whitelisted in Factory:  0x6760e6c7079ded13ecc6d9c971d3e536d2f86482e035dab69a4fb428de1f96ea
+    ✔ Will Whitelist router in factory (7574ms)
+ExponentialCurve deployed at Address:  0x204E1eA4cEb251785A6B71D9E74CA9bd4226C78f
+    ✔ Will deploy ExponentialCurve contract (6811ms)
+LinearCurve deployed at Address:  0x3D26E7FB6e8A1258e87C9Ecdb7D820AF4C370cb2
+    ✔ Will deploy LinearCurve contract (8097ms)
+QuadraticCurve deployed at Address:  0x339B77Ce4ecA6C7e074dE7026EF4c6B0D7372011
+    ✔ Will deploy QuadraticCurve contract (10022ms)
+ExponentialCurve whitelisted at:  0xc0185d07284f821424d42f90b918374f63f064d3eac7627502b6386920b40bb8
+LinearCurve whitelisted at:  0xf5bb350dbd9a3824b1d202119a85fcf9fce20d8bccf2824a52cbb11a3944c3ce
+QuadraticCurve whitelisted at:  0x08b79b4d90f8c65bc33cd98cfe6339c182cfdff6949a91966e0a47ec6ee905b5
+    ✔ Whitelist bonding curves in factory (24289ms)
 Transferred factory ownership.
 New Owner:  0x1021BB533a5c04B7F9E0cE55c9C3Cd539A7aFc95 
-Hash:  0x93425cc5567fddcdda1fc7f86ce8d04296605a6f51702bf158c3776a3bd6dea1
-    ✔ Transfer factory ownership to admin (7767ms)
+Hash:  0x05e71fc636a6e873a37d134b35d30c94c2a22f5780d2dd94b897421f8674f35a
+    ✔ Transfer factory ownership to admin (9898ms)
 
 
-  11 passing (1m)
+  12 passing (2m)
