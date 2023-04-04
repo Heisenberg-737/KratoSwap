@@ -16,7 +16,8 @@ describe("Deploy", function () {
     LSSVMPairFactoryAddress,
     LSSVMRouterAddress,
     exponentialCurveAddress,
-    linearCurveAddress;
+    linearCurveAddress,
+    quadraticCurveAddress;
 
   //settings
   let PROTOCOL_FEE_MULTIPLIER = 0;
@@ -154,6 +155,16 @@ describe("Deploy", function () {
     linearCurveAddress = linearCurve.address;
     console.log("LinearCurve deployed at Address: ", linearCurve.address);
   });
+
+  it("Will deploy QuadraticCurve contract", async function () {
+    const QuadraticCurve = await ethers.getContractFactory("QuadraticCurve");
+    const quadraticCurve = await QuadraticCurve.deploy();
+    await quadraticCurve.deployed();
+
+    quadraticCurveAddress = quadraticCurve.address;
+    console.log("QuadraticCurve deployed at Address: ", quadraticCurve.address);
+  });
+
   it("Whitelist bonding curves in factory", async function () {
     const LSSVMRouter = await ethers.getContractAt(
       "LSSVMPairFactory",
@@ -172,11 +183,15 @@ describe("Deploy", function () {
     );
     await setAllowedLinear.wait();
 
-    console.log(
-      "ExponentialCurve whitelisted at: ",
-      setAllowedExponential.hash
+    const setAllowedQuadratic = await LSSVMRouter.setBondingCurveAllowed(
+      quadraticCurveAddress,
+      true
     );
+    await setAllowedQuadratic.wait();
+
+    console.log("ExponentialCurve whitelisted at: ", setAllowedExponential.hash);
     console.log("LinearCurve whitelisted at: ", setAllowedLinear.hash);
+    console.log("QuadraticCurve whitelisted at: ", setAllowedQuadratic.hash);
   });
   it("Transfer factory ownership to admin", async function () {
     const LSSVMRouter = await ethers.getContractAt(
